@@ -1,34 +1,24 @@
-slices = 100
-total_types = 10
-pizza_types = [4, 14, 15, 18, 29, 32, 36, 82, 95, 95]
-
-# =============================================================================
-
 summation = 0
+max_summation = 0
 
 
 def read_file():
-    with open("Docs/a_example.in", "r") as inp:
-        n = inp.readline()
-        p = inp.readline()
-    n1 = n[:-1]
-    p1 = p[:-1]
+    with open("Docs/b_small.in", "r") as inp:
+        n = inp.readlines()
+    n1 = n[0][:-1]
+    p1 = n[1][:-1]
 
-    lis1 = n1.split(" ")
-    lis2 = p1.split(" ")
-    max_slices = lis1[0]
-    type_pizza = lis1[1]
-    pizza = []
+    n1 = n1.split(" ")
+    n1[0] = int(n1[0])
+    n1[1] = int(n1[1])
 
-    for i in lis2:
-        pizza.append(i)
-
-    return max_slices, type_pizza, pizza
+    p1 = list(map(int, p1.split(" ")))
+    return n1[0], n1[1], p1
 
 
 max_slices, type_pizza, pizza = read_file()
-slices = max_slices
-total_types = type_pizza
+slices = int(max_slices)
+total_types = int(type_pizza)
 pizza_types = [int(i) for i in pizza]
 
 
@@ -46,18 +36,16 @@ def create_output_file(required_list, no_of_pizzas):
         f.write(" ".join([str(i) for i in required_list]))
 
 
-max_summation = 0
-
 for idx, item_i in enumerate(pizza_types):
     summation = item_i
-    required_list = [item_i]
+    required_list = [idx]
 
     for jdx, item_j in enumerate(reversed(pizza_types)):
         temp = summation + item_j
         if temp <= slices and check_index(idx, jdx):
             summation = temp
             print("Appending", required_list)
-            required_list.append(item_j)
+            required_list.append((total_types - 1) - jdx)
 
     if summation >= max_summation:
         max_summation = summation
@@ -65,5 +53,6 @@ for idx, item_i in enumerate(pizza_types):
     if summation == slices:
         break
 
+# print(sorted(required_list))
 create_output_file(sorted(required_list), len(required_list))
 
