@@ -49,11 +49,11 @@ for idx, item_i in enumerate(pizza_types):
 
     if summation >= max_summation:
         max_summation = summation
-    # print("local max", summation, "list", required_list)
+
     if summation == max_slices:
         break
 
-# print(sorted(required_list))
+
 def get_total_of_opted_pizzas(required_list):
     total = 0
     for index in required_list:
