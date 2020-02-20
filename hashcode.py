@@ -1,66 +1,61 @@
-summation = 0
-max_summation = 0
+class HashCode:
+    def __init__(self, input_file, output_file):
+        self.input_file = input_file
+        self.output_file = output_file
+        self.max_slices, self.pizza_type, self.pizza_list = self.read_file()
+        self.max_summation = 0
+
+    def read_file(self):
+        with open(self.input_file, "r") as input_file:
+            lines = input_file.readlines()
+
+        first_line = lines[0][:-1]
+        second_line = lines[1][:-1]
+
+        # converting first line into two element array
+        first_line_list = first_line.split(" ")
+
+        max_slices = int(first_line_list[0])  # getting max_slices
+        pizza_types = int(first_line_list[1])  # getting total nos of pizza
+
+        # typecasting second line into list of integers
+        pizza = list(map(int, second_line.split(" ")))
+
+        return max_slices, pizza_types, pizza
+
+    def create_output_file(self, required_list, no_of_pizzas):
+        with open(self.output_file, "w") as f:
+            f.write(str(no_of_pizzas) + "\n")
+            f.write(" ".join(list(map(str, required_list))))
+
+    def verify_indexes(self, index1, index2):
+        index2 = (self.pizza_type - 1) - index2  # -1 because we are doing with indexes
+
+        if index1 != index2:
+            return True, index2
+        return False, None
+
+    def run(self):
+        for idx, item_i in enumerate(self.pizza_list):
+            summation = item_i
+            required_list = [idx]
+
+            for jdx, item_j in enumerate(reversed(self.pizza_list)):
+                temp_total = summation + item_j
+                varified_index, index = self.verify_indexes(idx, jdx)
+                if temp_total <= self.max_slices and varified_index:
+                    summation = temp_total
+                    required_list.append(index)
+
+            if summation >= self.max_summation:
+                self.max_summation = summation
+                if summation == self.max_slices:
+                    break
+
+        self.create_output_file(sorted(required_list), len(required_list))
 
 
-def read_file(file_path):
-    with open(file_path, "r") as inp:
-        n = inp.readlines()
-    n1 = n[0][:-1]
-    p1 = n[1][:-1]
+input_file_name = "e_also_big.in"
+obj_hash = HashCode(input_file_name, input_file_name + ".out")
 
-    n1 = n1.split(" ")
-    n1[0] = int(n1[0])
-    n1[1] = int(n1[1])
-
-    p1 = list(map(int, p1.split(" ")))
-    return n1[0], n1[1], p1
-
-
-max_slices, type_pizza, pizza = read_file("f_my_file.in")
-
-max_slices = int(max_slices)
-type_pizza = int(type_pizza)
-pizza_types = [int(i) for i in pizza]
-
-
-def check_index(i, j):
-    j = (type_pizza - 1) - j  # -1 because we are doing with indexes
-    if i != j:
-        return True
-    return False
-
-
-def create_output_file(required_list, no_of_pizzas):
-    with open("file.txt", "w") as f:
-        f.write(str(no_of_pizzas) + "\n")
-
-        f.write(" ".join([str(i) for i in required_list]))
-
-
-for idx, item_i in enumerate(pizza_types):
-    summation = item_i
-    required_list = [idx]
-
-    for jdx, item_j in enumerate(reversed(pizza_types)):
-        temp = summation + item_j
-        if temp <= max_slices and check_index(idx, jdx):
-            summation = temp
-            required_list.append((type_pizza - 1) - jdx)
-
-    if summation >= max_summation:
-        max_summation = summation
-
-    if summation == max_slices:
-        break
-
-
-def get_total_of_opted_pizzas(required_list):
-    total = 0
-    for index in required_list:
-        total += pizza_types[index]
-    return total
-
-
-print(max_slices, get_total_of_opted_pizzas(required_list))
-create_output_file(sorted(required_list), len(required_list))
-
+obj_hash.run()
