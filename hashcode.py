@@ -1,3 +1,6 @@
+import argparse
+
+
 class HashCode:
     def __init__(self, input_file, output_file):
         self.input_file = input_file
@@ -29,7 +32,8 @@ class HashCode:
             f.write(" ".join(list(map(str, required_list))))
 
     def verify_indexes(self, index1, index2):
-        index2 = (self.pizza_type - 1) - index2  # -1 because we are doing with indexes
+        # -1 because we are doing with indexes
+        index2 = (self.pizza_type - 1) - index2
 
         if index1 != index2:
             return True, index2
@@ -51,11 +55,16 @@ class HashCode:
                 self.max_summation = summation
                 if summation == self.max_slices:
                     break
-
+        print(summation)
         self.create_output_file(sorted(required_list), len(required_list))
 
 
-input_file_name = "e_also_big.in"
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--filename", help="Filename you want to get output from it")
+args = parser.parse_args()
+
+input_file_name = args.filename
 obj_hash = HashCode(input_file_name, input_file_name + ".out")
 
 obj_hash.run()
