@@ -3,15 +3,16 @@ import argparse
 from Book import Book
 from Library import Library
 
+from termcolor import colored, cprint
+
 
 class PlayBookTeam:
     def __init__(self, deadline, book_score_list, libraries):
         self.deadline = deadline
         self.pile_of_libraries = self.populate_libraries(
             book_score_list, libraries)
-        self.in_process_libraries = []
+        self.in_process_library = None  # if any library is in signup process
         self.registered_libraries = []
-        self.is_busy = False  # if any library is in signup process
 
     def populate_libraries(self, book_score_list, libraries):
         my_libraries = []
@@ -29,50 +30,46 @@ class PlayBookTeam:
                 Library(l_id, buff_time, capacity, desirable_books_list))
         return my_libraries
 
-    def start_new_signup_process(self):
-        # TODO: make optimization to get best libraries here
+    def set_new_inprocess_library(self):
         for library in self.pile_of_libraries:
             if not library.registered:
-                return library
+                self.in_process_library = library
+                self.in_process_library.processing = True
+                self.in_process_library.processing_left -= 1
+                break
+
+    def regular_process_books(self):
+        for library in self.registered_libraries:
+            library.process_books()
 
     def regular_team_check(self):
-        for library in self.pile_of_libraries:
-            # print(library.l_id, library.processing,
-            #       library.processing_left, library.registered)
-            # TODO: not working how much processing left
-            if library.processing and library.processing_left > 0:
-                library.processing_left = library.processing_left - 1
-                # print(library.processing_left)
-            else:
-                if not library.registered and library.processing_left == 0:
-                    self.registered_libraries.append(library)
-                    library.registered = True
-                    library.processing = False
-                    self.is_busy = False
+        if self.in_process_library:
+            if self.in_process_library.processing_left > 0:
+                self.in_process_library.processing_left -= 1
 
-            # print("---")
-            # else:
-            #     self.pile_of_libraries.remove(library)
+            else:
+                self.in_process_library.registered = True
+                self.in_process_library.processing = False
+                self.registered_libraries.append(self.in_process_library)
+                self.in_process_library = None
+        else:
+            self.set_new_inprocess_library()
 
     def main(self):
-
+        day = 0
         while self.deadline > 0:
-            # updating register libraries queue everyday
-            if self.deadline % 1000 == 0:
-                print("DAYS LEFT", self.deadline)
-            # print("I AM BUSY", self.is_busy)
-            # Make regular check more speed efficient
-            if not self.is_busy:
-                lib = self.start_new_signup_process()
-                if lib:
-                    lib.processing = True
-                    self.is_busy = True
+            # print("--"*10, f':Day {day} STARTED:', "--"*10)
 
-            self.regular_team_check()  # daily library status chaking
-            # processign parrallal book scanning here
-            for registered_library in self.registered_libraries:
-                registered_library.process_books()
+            print("DAYS LEFT", self.deadline) if self.deadline % 1000 == 0 else ""
+
+            self.regular_team_check()
+            self.regular_process_books()
+
+            if not self.in_process_library:
+                self.set_new_inprocess_library()
             self.deadline -= 1
+            # print("--"*10, f':Day {day} Completed:', "--"*10+"\n\n")
+            day += 1
 
     def save_file(self, filename, write=True):
         line1 = str(len(self.registered_libraries))+'\n'
