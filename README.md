@@ -2,7 +2,7 @@
 
 Instruction:
 All input files are in inputs.zip
-Extract them into same dir where is hashcode.py and then run `python3 --filename <file_name>` to get output of that specific file name with .out format.
+Extract them into same dir where is hashcode.py and then run `python3 hashcode.py --filename <file_name>` to get output of that specific file name with .out format.
 
 # Score
 
