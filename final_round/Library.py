@@ -6,7 +6,7 @@ class Library:
         self.buffer_time = buffer_time
         self.l_id = l_id
         self.l_score = self.get_library_score()
-        self.processing_left = self.buffer_time
+        self.processing_left = buffer_time
         self.scanned_books = []
         self.processing = False
         self.registered = False
