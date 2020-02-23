@@ -29,26 +29,30 @@ class PlayBookTeam:
                 Library(l_id, buff_time, capacity, desirable_books_list))
         return my_libraries
 
-    def get_efficient_library(self):
+    def start_new_signup_process(self):
         # TODO: make optimization to get best libraries here
-        # print(
-            # [f'Registration Status:{library.registered}' for library in libraries])
         for library in self.pile_of_libraries:
             if not library.registered:
                 return library
 
     def regular_team_check(self):
         for library in self.pile_of_libraries:
-            if not library.registered and library.processing_left == 0:
-                self.registered_libraries.append(library)
-                library.registered = True
-                library.processing = False
-                self.is_busy = False
-                # print('processed library appended to registed queue')
+            # print(library.l_id, library.processing,
+            #       library.processing_left, library.registered)
+            # TODO: not working how much processing left
+            if library.processing and library.processing_left > 0:
+                library.processing_left = library.processing_left - 1
+                # print(library.processing_left)
             else:
-                if library.processing:
-                    # print("processing library found", library.l_id)
-                    library.processing_left = library.processing_left - 1
+                if not library.registered and library.processing_left == 0:
+                    self.registered_libraries.append(library)
+                    library.registered = True
+                    library.processing = False
+                    self.is_busy = False
+
+            # print("---")
+            # else:
+            #     self.pile_of_libraries.remove(library)
 
     def main(self):
 
@@ -56,33 +60,33 @@ class PlayBookTeam:
             # updating register libraries queue everyday
             if self.deadline % 1000 == 0:
                 print("DAYS LEFT", self.deadline)
-            self.regular_team_check()  # daily library status chaking
-
+            # print("I AM BUSY", self.is_busy)
+            # Make regular check more speed efficient
             if not self.is_busy:
-                lib = self.get_efficient_library()
-                # print("NEW SCANNING START for library", lib.l_id)
-                lib.processing = True
-                self.is_busy = True
+                lib = self.start_new_signup_process()
+                if lib:
+                    lib.processing = True
+                    self.is_busy = True
 
+            self.regular_team_check()  # daily library status chaking
             # processign parrallal book scanning here
             for registered_library in self.registered_libraries:
                 registered_library.process_books()
             self.deadline -= 1
-            # print([lib.l_id for lib in obj_playbooks.registered_libraries])
-            # print("--"*20)
 
-    def save_file(self):
+    def save_file(self, filename, write=True):
         line1 = str(len(self.registered_libraries))+'\n'
-        # print("line1", line1)
+        # print("line1::>", line1)
         lines = ""
         for library in self.registered_libraries:
             lines = lines + str(library.l_id)+" " + str(len(library.scanned_books)) + \
                 "\n"+" ".join([str(book.b_id)
                                for book in library.scanned_books])+"\n"
-            with open("file.txt", "w") as f:
+        if write:
+            with open(filename, "w") as f:
                 f.write(line1)
                 f.write(lines)
-        # print(lines)
+        # print("lines", lines)
 
 
 parser = argparse.ArgumentParser()
@@ -105,10 +109,8 @@ with open(input_file_name, 'r') as f:
         if len(temp) == 2:
             LIBRARIES.append(temp)
             temp = []
-            # print(LIBRARIES)
-    # print(len(LIBRARIES))
 
 
 obj_playbooks = PlayBookTeam(DEADLINE, BOOK_SCORE_LIST, LIBRARIES)
 obj_playbooks.main()
-obj_playbooks.save_file()
+obj_playbooks.save_file(input_file_name+".out")
