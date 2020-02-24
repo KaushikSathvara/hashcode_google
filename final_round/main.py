@@ -4,6 +4,8 @@ from Book import Book
 from Library import Library
 
 from termcolor import colored, cprint
+import operator
+from tqdm import tqdm
 
 
 class PlayBookTeam:
@@ -13,22 +15,36 @@ class PlayBookTeam:
             book_score_list, libraries)
         self.in_process_library = None  # if any library is in signup process
         self.registered_libraries = []
+        self.pile_of_libraries.sort(
+            key=operator.attrgetter('l_score'))  # sorting here
 
     def populate_libraries(self, book_score_list, libraries):
         my_libraries = []
         # Distributing books to libraries
-        for l_id, library in enumerate(libraries):
+        repeated_queue = []
+        for l_id, library in enumerate(tqdm(libraries)):
             prop, books = library
             desirable_books_list = []
-            for book_id in books:
-                book_score = book_score_list[book_id]
-                desirable_books_list.append(
-                    Book(b_id=book_id, b_score=book_score))
 
+            repeated_objs = [b.b_id for b in repeated_queue]
+            for book_id in books:
+                if book_id not in repeated_objs:
+                    book_score = book_score_list[book_id]
+                    book_obj = Book(b_id=book_id, b_score=book_score)
+                    desirable_books_list.append(book_obj)
+                    repeated_queue.append(book_obj)
+                else:
+                    for book_obj in repeated_queue:
+                        if book_obj.b_id == book_id:
+                            desirable_books_list.append(book_obj)
+            # print("LIB", l_id, "completer")
             _, buff_time, capacity = prop
+
             my_libraries.append(
                 Library(l_id, buff_time, capacity, desirable_books_list))
         return my_libraries
+
+    # def get_custom_list(self):
 
     def set_new_inprocess_library(self):
         for library in self.pile_of_libraries:
@@ -91,7 +107,7 @@ parser.add_argument(
     "--filename", help="Filename you want to get output from it")
 args = parser.parse_args()
 
-input_file_name = args.filename
+input_file_name = args.filename or 'data/a_example.txt'
 with open(input_file_name, 'r') as f:
     NO_OF_BOOKS, NO_OF_LIBRARY, DEADLINE = [
         int(i) for i in f.readline()[:-1].split(" ")]

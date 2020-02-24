@@ -1,3 +1,6 @@
+import operator
+
+
 class Library:
     def __init__(self, l_id, buffer_time, capacity, books):
         self.books = books
@@ -11,6 +14,7 @@ class Library:
         self.processing = False
         self.registered = False
         self.scanned_all_books = False
+        self.books.sort(key=operator.attrgetter('b_score'))
 
     def get_library_score(self):
         '''
@@ -19,6 +23,7 @@ class Library:
         '''
         score_list = [book.b_score for book in self.books]
         total_cost_of_books = sum(score_list)
+        # return self.buffer_time
         return (total_cost_of_books/self.buffer_time)*self.capacity
 
     def process_books(self):
@@ -29,7 +34,7 @@ class Library:
             count = 0
             for book in self.books:
                 # only scan book if it's not scanned and some capacity is left today
-                if count < self.capacity and not book.is_scanned:
+                if not book.is_scanned and count < self.capacity:
                     book.is_scanned = True
                     self.scanned_books.append(book)
                     count += 1
